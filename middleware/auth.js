@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 //this middleware takes the token and convert it into user id
 //using the userid we can use api
-const bcrypt = require('bcryptjs');
+import bcrypt from "bcryptjs"
 const authMiddleWare = async(req,res , next)=>{
 const {token} = req.headers;
 if(!token){
