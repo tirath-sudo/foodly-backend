@@ -40,3 +40,5 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Server Started on Port:${port}`);
 });
+
+const bcrypt = require('bcrypt');
