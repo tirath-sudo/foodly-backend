@@ -37,5 +37,4 @@ app.get("/", (req, res) => {
   res.send("API Working");
 });
 
-
-const bcrypt = require('bcrypt');
+import bcrypt from "bcryptjs"
