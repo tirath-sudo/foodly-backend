@@ -1,40 +1,54 @@
-//FOR COMPLETE FUNCTIONING 
-//UPDATE THE LOCALHOST SERVER IN ORDERCONTROLLER.JS
-//USE NPM RUN DEV FOR FRONTEND
-//USE NPM RUN SERVER FOR BACKEND
-
 import express from "express";
 import cors from "cors";
-import { connectDB } from "./config/db.js";
-import foodRouter from "./routes/foodRoutes.js";
-import userRouter from "./routes/userRoute.js"; // Corrected path
 import dotenv from "dotenv";
+import { connectDB } from "./config/db.js";
+
+import foodRouter from "./routes/foodRoutes.js";
+import userRouter from "./routes/userRoute.js";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 
 dotenv.config();
 
-// app config
 const app = express();
-const PORT = process.env.PORT||4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-// middleware
-app.use(express.json());
-app.use(cors());
+// Body parsers — big enough for images/JSON
+app.use(express.json({ limit: "25mb" }));
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 
-// db connection
+// CORS — allowed deployed frontends
+const allowedOrigins = [
+  "https://client-1myinw1im-tirath-singhs-projects.vercel.app/",
+  "https://admin-kvk0fl7sq-tirath-singhs-projects.vercel.app",
+  
+];
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      // allow REST clients / curl with no origin
+      if (!origin) return cb(null, true);
+      return allowedOrigins.includes(origin)
+        ? cb(null, true)
+        : cb(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
+
+// Static (if you ever keep local uploads; not required for Cloudinary)
+app.use("/images", express.static("uploads"));
+
+// DB
 connectDB();
 
-// api endpoints
-app.use('/api/food', foodRouter);
-app.use('/images', express.static('uploads'));
-app.use('/api/user', userRouter);
-app.use('/api/cart',cartRouter)
-app.use("/api/order",orderRouter)
+// Routes
+app.use("/api/food", foodRouter);
+app.use("/api/user", userRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/order", orderRouter);
 
-app.get("/", (req, res) => {
-  res.send("API Working");
-});
+// Health
+app.get("/", (req, res) => res.send("API Working"));
 
-import bcrypt from "bcryptjs"
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));

@@ -1,46 +1,46 @@
 import foodModel from "../models/foodmodel.js";
 
-// Add food item
+// Add food item (image already uploaded by multer-storage-cloudinary)
 const addFood = async (req, res) => {
-  // Cloudinary automatically gives a secure URL for the uploaded file
-  let image_url = req.file.path;   // <-- use Cloudinary path, not local filename
-
-  const food = new foodModel({
-    name: req.body.name,
-    description: req.body.description,
-    price: req.body.price,
-    category: req.body.category,
-    image: image_url   // <-- store Cloudinary URL in DB
-  });
-
   try {
-    await food.save();
-    res.json({ success: true, message: "Food Added" });
+    const image_url = req.file?.path || ""; // Cloudinary secure URL
+    if (!image_url) {
+      return res.json({ success: false, message: "Image required" });
+    }
+
+    const food = await foodModel.create({
+      name: req.body.name,
+      description: req.body.description,
+      price: req.body.price,
+      category: req.body.category,
+      image: image_url,
+    });
+
+    res.json({ success: true, message: "Food Added", data: food });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json({ success: false, message: "Error" });
   }
 };
 
-// all food list
+// Get list
 const listFood = async (req, res) => {
   try {
     const foods = await foodModel.find({});
     res.json({ success: true, data: foods });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json({ success: false, message: "Error" });
   }
 };
 
-// remove food items
+// Remove
 const removeFood = async (req, res) => {
   try {
-    // just remove from DB, no need for fs.unlink (Cloudinary manages files)
     await foodModel.findByIdAndDelete(req.body.id);
     res.json({ success: true, message: "Removed" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json({ success: false, message: "Error" });
   }
 };
