@@ -9,7 +9,6 @@ import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 
 dotenv.config();
-
 const app = express();
 
 // Body parsers
@@ -26,10 +25,7 @@ function isAllowedOrigin(origin) {
   if (!origin) return true; // server-to-server, curl, Postman
   try {
     const url = new URL(origin);
-
-    // ✅ allow ALL Vercel preview subdomains
-    if (url.hostname.endsWith(".vercel.app")) return true;
-
+    if (url.hostname.endsWith(".vercel.app")) return true; // ✅ allow all vercel subdomains
     return allowlist.has(origin);
   } catch {
     return false;
@@ -44,12 +40,16 @@ const corsOptions = {
   exposedHeaders: ["Content-Type", "Authorization"],
 };
 
-// ✅ Use cors middleware
+// ✅ apply cors
 app.use(cors(corsOptions));
 
-// ✅ Explicitly handle OPTIONS everywhere with 200
-app.options("*", cors(corsOptions), (req, res) => {
-  res.sendStatus(200);
+// ✅ explicitly handle OPTIONS preflight
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  return res.sendStatus(200); // send 200 with headers (not 204 with none)
 });
 // ---- END CORS FIX ----
 
