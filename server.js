@@ -16,34 +16,41 @@ app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 
 // ---- CORS FIX ----
-const allowlist = new Set([
+const allowlist = [
   "https://admin-186ft4qex-tirath-singhs-projects.vercel.app",
   "https://client-dg0ysnjtx-tirath-singhs-projects.vercel.app",
-]);
+];
 
 function isAllowedOrigin(origin) {
   if (!origin) return true; // server-to-server, curl, Postman
   try {
     const url = new URL(origin);
-    if (url.hostname.endsWith(".vercel.app")) return true; // ✅ allow all vercel subdomains
-    return allowlist.has(origin);
+    if (url.hostname.endsWith(".vercel.app")) return true; // allow all vercel subdomains
+    return allowlist.includes(origin);
   } catch {
     return false;
   }
 }
 
-const corsOptions = {
-  origin: (origin, cb) => cb(null, isAllowedOrigin(origin)),
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+const corsOptionsDelegate = (req, cb) => {
+  const origin = req.header("Origin");
+  if (isAllowedOrigin(origin)) {
+    cb(null, {
+      origin: origin || "*",
+      credentials: true,
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+      allowedHeaders: ["Content-Type", "Authorization"],
+    });
+  } else {
+    cb(new Error("Not allowed by CORS"));
+  }
 };
 
-// ✅ apply cors globally
-app.use(cors(corsOptions));
+// Apply cors globally
+app.use(cors(corsOptionsDelegate));
 
-// ✅ explicitly reply to OPTIONS preflight with headers
-app.options("*", cors(corsOptions));
+// Explicit OPTIONS for all routes
+app.options("*", cors(corsOptionsDelegate));
 // ---- END CORS FIX ----
 
 // Static
