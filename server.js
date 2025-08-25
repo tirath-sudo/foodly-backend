@@ -37,20 +37,13 @@ const corsOptions = {
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  exposedHeaders: ["Content-Type", "Authorization"],
 };
 
-// ✅ apply cors
+// ✅ apply cors globally
 app.use(cors(corsOptions));
 
-// ✅ explicitly handle OPTIONS preflight
-app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  return res.sendStatus(200); // send 200 with headers (not 204 with none)
-});
+// ✅ explicitly reply to OPTIONS preflight with headers
+app.options("*", cors(corsOptions));
 // ---- END CORS FIX ----
 
 // Static
