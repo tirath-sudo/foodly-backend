@@ -16,18 +16,17 @@ const app = express();
 app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 
-// ---- CORS FIX (handles Vercel previews + production) ----
+// ---- CORS FIX ----
 const allowlist = new Set([
-  "https://client-1myinw1im-tirath-singhs-projects.vercel.app",  
-  "https://admin-kvk0fl7sq-tirath-singhs-projects.vercel.app", 
-  
+  "https://client-1myinw1im-tirath-singhs-projects.vercel.app",
+  "https://admin-kvk0fl7sq-tirath-singhs-projects.vercel.app",
 ]);
 
 function isAllowedOrigin(origin) {
-  if (!origin) return true; // allow server-to-server, curl, Postman
+  if (!origin) return true; // allow Postman, curl, server-to-server
   try {
     const url = new URL(origin);
-    // allow all vercel preview subdomains for your projects
+    // Allow all *.vercel.app previews
     if (url.hostname.endsWith(".vercel.app")) return true;
     return allowlist.has(origin);
   } catch {
@@ -36,17 +35,22 @@ function isAllowedOrigin(origin) {
 }
 
 const corsOptions = {
-  origin: (origin, cb) => cb(null, isAllowedOrigin(origin)),
+  origin: (origin, cb) => {
+    if (isAllowedOrigin(origin)) cb(null, true);
+    else cb(new Error("Not allowed by CORS"));
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   exposedHeaders: ["Content-Type", "Authorization"],
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
+  optionsSuccessStatus: 200, // <- safer for some browsers than 204
 };
 
+// Enable CORS globally
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // <-- IMPORTANT: handle preflight without 500
+
+// Explicitly handle preflight OPTIONS for all routes
+app.options("*", cors(corsOptions));
 // ---- END CORS FIX ----
 
 // Static (if you ever keep local uploads; not required for Cloudinary)
