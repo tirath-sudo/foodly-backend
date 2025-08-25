@@ -18,8 +18,8 @@ app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 
 // ---- CORS FIX ----
 const allowlist = new Set([
-  "https://client-1myinw1im-tirath-singhs-projects.vercel.app",
-  "https://admin-kvk0fl7sq-tirath-singhs-projects.vercel.app",
+  "https://client-dg0ysnjtx-tirath-singhs-projects.vercel.app",
+  "https://admin-186ft4qex-tirath-singhs-projects.vercel.app",
 ]);
 
 function isAllowedOrigin(origin) {
