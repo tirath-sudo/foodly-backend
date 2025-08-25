@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 // ---- CORS FIX ----
 const allowlist = new Set([
   "https://admin-186ft4qex-tirath-singhs-projects.vercel.app",
-  "https://client-dg0ysnjtx-tirath-singhs-projects.vercel.app", 
+  "https://client-dg0ysnjtx-tirath-singhs-projects.vercel.app",
 ]);
 
 function isAllowedOrigin(origin) {
@@ -27,7 +27,7 @@ function isAllowedOrigin(origin) {
   try {
     const url = new URL(origin);
 
-    // ✅ allow ALL Vercel preview subdomains (both client & admin)
+    // ✅ allow ALL Vercel preview subdomains
     if (url.hostname.endsWith(".vercel.app")) return true;
 
     return allowlist.has(origin);
@@ -42,11 +42,15 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   exposedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 200, // ✅ return 200 instead of 204 for OPTIONS
 };
 
+// ✅ Use cors middleware
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+
+// ✅ Explicitly handle OPTIONS everywhere with 200
+app.options("*", cors(corsOptions), (req, res) => {
+  res.sendStatus(200);
+});
 // ---- END CORS FIX ----
 
 // Static
