@@ -39,7 +39,7 @@ const corsOptionsDelegate = (req, cb) => {
       origin: origin || "*",
       credentials: true,
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-      allowedHeaders: ["Content-Type", "Authorization"],
+      allowedHeaders: ["Content-Type", "Authorization", "token"], // 👈 added token
     });
   } else {
     cb(new Error("Not allowed by CORS"));
